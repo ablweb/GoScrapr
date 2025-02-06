@@ -1,5 +1,4 @@
-# GoScrapr
 
-![Project Logo](./media/logoHighScrpr.png)
+![Project Logo](./media/logo.png)
 
-Web scraper tool writien in go
+GoScrapr is a web scraper tool written in go
