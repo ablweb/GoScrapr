@@ -19,14 +19,8 @@ var Gray = "\033[37m"
 var White = "\033[97m"
 
 type Rule struct {
-	Tag        string `json:"tag"`
-	HasAttr    []Attr `json:"has_attr"`
-	IgnoreAttr []Attr `json:"ignore_attr"`
-	Priority   int    `json:"priority"`
-}
-type Attr struct {
-	Attr       string `json:"attr"`
-	Value      string `json:"value"`
+	Query    string `json:"query"`
+	Priority int    `json:"priority"`
 }
 type RuleSet []Rule
 
@@ -89,7 +83,7 @@ func scrap(url *string, rules *RuleSet) bool {
 	} else {
 		// Scrap with rules
 		for _, rule := range *rules {
-			c.OnHTML(rule.Tag, func(e *colly.HTMLElement) {
+			c.OnHTML(rule.Query, func(e *colly.HTMLElement) {
 				fmt.Println(e.Text)
 			})
 		}

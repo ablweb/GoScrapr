@@ -1,24 +1,10 @@
 [
   {
-    "tag": "h1",
-    "has_attr": [
-      {"attr": "class", "value": "container", "match_type": "exact"},
-      {"attr": "id", "value": "main", "match_type": "exact"}
-    ],
-    "ignore_attr": [
-      {"attr": "data-ignore", "value": "true"}
-    ],
+    "query": "h1",
     "priority": 1
   },
   {
-    "tag": "h1",
-    "has_attr": [
-      {"attr": "class", "value": "title", "match_type": "exact"},
-      {"attr": "id", "value": "intro", "match_type": "contains"}
-    ],
-    "ignore_attr": [
-      {"attr": "style", "value": "bold"}
-    ],
+    "query": "div.description",
     "priority": 2
   }
 ]
