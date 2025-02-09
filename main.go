@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"os"
 	"net/http"
-  "encoding/json"
+	"os"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -13,10 +13,6 @@ var Error = "\033[31m"
 var Succes = "\033[32m" 
 var Warning = "\033[33m" 
 var Info = "\033[34m" 
-var Magenta = "\033[35m" 
-var Cyan = "\033[36m" 
-var Gray = "\033[37m" 
-var White = "\033[97m"
 
 type Rule struct {
 	Query    string `json:"query"`
@@ -54,7 +50,7 @@ func main() {
 		rules = nil
 		fmt.Println(Warning+"No rules provided. Scraping URL without any rules."+Reset)
 	}
-	scrap(&url, &rules)
+	fmt.Print(scrap(&url, &rules))
 }
 
 func isReachable(url *string) bool {
@@ -70,21 +66,23 @@ func isReachable(url *string) bool {
 	}
 }
 
-func scrap(url *string, rules *RuleSet) bool {
+func scrap(url *string, rules *RuleSet) (string, error) {
 	c := colly.NewCollector()
+	var dataMap = make(map[int]string)
+
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Printf(Info+"Visiting: %s\n"+Reset, r.URL)
 	})
-	if rules == nil {
+	if len(*rules) == 0  {
 		// Scrap everything
 		c.OnHTML("html", func(e *colly.HTMLElement) {
-			fmt.Println(e.Text)
+			dataMap[0] += e.Text+"\n"
 		})
 	} else {
 		// Scrap with rules
 		for _, rule := range *rules {
 			c.OnHTML(rule.Query, func(e *colly.HTMLElement) {
-				fmt.Println(e.Text)
+				dataMap[rule.Priority] += e.Text+"\n"
 			})
 		}
 	}
@@ -92,6 +90,13 @@ func scrap(url *string, rules *RuleSet) bool {
 		fmt.Printf(Error+"Error while scraping: %s\n"+Reset, err.Error())
 	})
 
-	c.Visit(*url)
-	return true
+	if err := c.Visit(*url); err != nil {
+		return "", err
+	}
+	
+	var scraped string
+	for _, data := range dataMap {
+		scraped += data
+	}
+	return scraped, nil
 }

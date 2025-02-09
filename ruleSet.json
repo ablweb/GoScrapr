@@ -4,7 +4,7 @@
     "priority": 1
   },
   {
-    "query": "div.description",
-    "priority": 2
+    "query": "h2",
+    "priority": 0
   }
 ]
