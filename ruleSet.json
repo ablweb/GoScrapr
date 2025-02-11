@@ -5,6 +5,10 @@
   },
   {
     "query": "h2",
-    "priority": 0
+    "priority": 2
+  },
+  {
+    "query": "p.desc",
+    "priority": 1
   }
 ]
