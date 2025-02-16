@@ -10,6 +10,22 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+const HELP = `Usage: scraper [URL] [RuleSet Path (optional)]
+
+Parameters:
+  URL            The website URL to scrape (required).
+  RuleSet Path   Path to a JSON file defining scraping rules (optional).
+
+RuleSet Format (JSON array):
+[
+  { "query": "h1", "priority": 1 },
+  { "query": "h2", "priority": 2 },
+  { "query": "p.desc", "priority": 1 }
+]
+- "query": CSS selector for elements to scrape.
+- "priority": Determines the order of output (lower values appear first).
+`
+
 var Reset = "\033[0m"
 var Error = "\033[31m"
 var Succes = "\033[32m"
@@ -25,7 +41,8 @@ type RuleSet []Rule
 func main() {
 	// No URL
 	if len(os.Args) < 2 {
-		fmt.Println(Error + "No URL to scrape" + Reset)
+		logError("No URL to scrap")
+		fmt.Fprint(os.Stderr, HELP)
 		os.Exit(1)
 	}
 	url := os.Args[1]
@@ -54,6 +71,10 @@ func main() {
 	}
 	scraped, _ := scrap(&url, &rules)
 	fmt.Print(scraped)
+}
+
+func logError(err string) {
+	fmt.Fprintln(os.Stderr, "Error:", err)
 }
 
 func isReachable(url *string) bool {
