@@ -26,12 +26,6 @@ RuleSet Format (JSON array):
 - "priority": Determines the order of output (lower values appear first).
 `
 
-var Reset = "\033[0m"
-var Error = "\033[31m"
-var Succes = "\033[32m"
-var Warning = "\033[33m"
-var Info = "\033[34m"
-
 type Rule struct {
 	Query    string `json:"query"`
 	Priority int    `json:"priority"`
@@ -41,52 +35,49 @@ type RuleSet []Rule
 func main() {
 	// No URL
 	if len(os.Args) < 2 {
-		logError("No URL to scrap")
+		fmt.Fprintln(os.Stderr, "Error: No URL to scrap")
 		fmt.Fprint(os.Stderr, HELP)
 		os.Exit(1)
 	}
 	url := os.Args[1]
 	// Not valid URL
 	if !isReachable(&url) {
-		fmt.Println(Error + "URL is not reachable" + Reset)
+		fmt.Fprintln(os.Stderr, "Error: URL is not reachable")
 		os.Exit(1)
 	}
-	fmt.Println(Succes + "URL is reachable" + Reset)
 	var rules RuleSet
 	if len(os.Args) > 2 {
 		rulesPath := os.Args[2]
 		jsonContent, err_R := os.ReadFile(rulesPath)
 		if err_R != nil {
-			fmt.Printf(Error+"Error reading file: %s\n"+Reset, err_R)
+			fmt.Fprintln(os.Stderr, "Error: while reading file: ", err_R)
 			os.Exit(1)
 		}
 		err_U := json.Unmarshal(jsonContent, &rules)
 		if err_U != nil {
-			fmt.Printf(Error+"Error unmarshalling JSON: %s\n"+Reset, err_U)
+			fmt.Fprintln(os.Stderr, "Error: unmarshalling JSON: ", err_U)
 			os.Exit(1)
 		}
 	} else {
 		rules = nil
-		fmt.Println(Warning + "No rules provided. Scraping URL without any rules." + Reset)
 	}
 	scraped, _ := scrap(&url, &rules)
-	fmt.Print(scraped)
-}
-
-func logError(err string) {
-	fmt.Fprintln(os.Stderr, "Error:", err)
+	fmt.Fprintln(os.Stdout, scraped)
 }
 
 func isReachable(url *string) bool {
 	// check if url is valid
-	fmt.Print(Info + "Checking URL: " + Reset)
 	resp, err := http.Get(*url)
 	if err != nil {
-		print(Error + err.Error() + "\n" + Reset)
+		fmt.Fprintln(os.Stderr, err.Error())
 		return false
 	} else {
-		print(Info + fmt.Sprint(resp.StatusCode) + resp.Status + "\n" + Reset)
-		return true
+		if (resp.StatusCode == 404) {
+			fmt.Fprintln(os.Stderr, resp.Status)
+			return false
+		} else {
+			return true
+		}
 	}
 }
 
@@ -94,9 +85,6 @@ func scrap(url *string, rules *RuleSet) (string, error) {
 	c := colly.NewCollector()
 	var dataMap = make(map[int]string)
 
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Printf(Info+"Visiting: %s\n"+Reset, r.URL)
-	})
 	if len(*rules) == 0 {
 		// Scrap everything
 		c.OnHTML("html", func(e *colly.HTMLElement) {
@@ -111,7 +99,7 @@ func scrap(url *string, rules *RuleSet) (string, error) {
 		}
 	}
 	c.OnError(func(r *colly.Response, err error) {
-		fmt.Printf(Error+"Error while scraping: %s\n"+Reset, err.Error())
+		fmt.Fprintln(os.Stderr, "Error : while scraping: ", err.Error())
 	})
 
 	if err := c.Visit(*url); err != nil {
