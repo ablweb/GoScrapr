@@ -1,14 +1,6 @@
 [
   {
-    "query": "h1",
-    "priority": 1
-  },
-  {
-    "query": "h2",
-    "priority": 2
-  },
-  {
-    "query": "p.desc",
+    "query": ".wikitable",
     "priority": 1
   }
 ]
