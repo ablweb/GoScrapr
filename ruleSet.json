@@ -1,6 +1,6 @@
 [
   {
-    "query": ".wikitable",
-    "priority": 1
+    "scope": ".wikitable",
+    "query": "tr"
   }
 ]
