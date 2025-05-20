@@ -1,16 +1,16 @@
 ROOT := ./
 BIN  := $(ROOT)bin/
-SRC  := $(ROOT)src/
+SRC  := $(ROOT)cmd/
 
 .PHONY: all clean
 
-all: scraper xlsxwriter
+all: scraper wikixls
 
 scraper:
 	go build -o $(BIN)scraper $(SRC)scraper/main.go
 
-xlsxwriter:
-	go build -o $(BIN)xlsxwriter $(SRC)xlsxwriter/main.go
+wikixls:
+	go build -o $(BIN)wikixls $(SRC)wikixls/main.go
 
 clean:
 	rm -rf $(BIN)
