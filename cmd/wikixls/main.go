@@ -6,6 +6,13 @@ import (
 )
 
 func main() {
+
+	// Look in excelize Api for way to convert html directly to excell, maybe faster then my way
+	// otherwise my way
+
+	// Save as html only good data from hmtl
+	// open file in excell which converts to excell then save it
+
 	// Create a new Excel file
 	f := excelize.NewFile()
 
