@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/ablweb/GoScrapr/pkg/scraper"
@@ -23,43 +24,43 @@ RuleSet Format (JSON array):
 - "priority": Determines the order of output (lower values appear first).
 `
 
-func main() {
+func run(out, errOut io.Writer, args []string) int {
 	// No URL
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "Error: No URL to scrap")
-		fmt.Fprint(os.Stderr, HELP)
-		os.Exit(1)
+	if len(args) < 1 {
+		fmt.Fprintln(errOut, "Error: No URL to scrap")
+		fmt.Fprint(out, HELP)
+		return 1
 	}
-	url := os.Args[1]
+	url := args[0]
 
 	// Not valid URL
 	reach, err := scraper.IsReachable(url)
 	if !reach {
-		fmt.Fprintln(os.Stderr, "Error: URL is not reachable : ", err)
-		os.Exit(1)
+		fmt.Fprintln(errOut, "Error: URL is not reachable : ", err)
+		return 1
 	}
 
 	var rules scraper.RuleSet
-	if len(os.Args) > 2 {
-		rulesPath := os.Args[2]
+	if len(args) > 1 {
+		rulesPath := args[1]
 		rules, err = scraper.LoadRules(rulesPath)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: While loading rules", err)
-			os.Exit(1)
+			fmt.Fprintln(errOut, "Error: While loading rules", err)
+			return 1
 		}
 	}
 
 	scraped, err := scraper.Scrap(url, rules)
 	if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: While scrapping", err)
-			os.Exit(1)
+		fmt.Fprintln(errOut, "Error: While scrapping", err)
+		return 1
 	}
-	for _, e := range scraped { 
-		fmt.Fprint(os.Stdout, "'")
-		fmt.Fprint(os.Stdout, e.Path)
-		fmt.Fprint(os.Stdout, " | ")
-		fmt.Fprint(os.Stdout, e.Content)
-		fmt.Fprint(os.Stdout, "'")
-		fmt.Println()
+	for _, e := range scraped {
+		fmt.Fprintf(out, "'%s | %s'\n", e.Path, e.Content)
 	}
+	return 0
+}
+
+func main() {
+	os.Exit(run(os.Stdout, os.Stderr, os.Args[1:]))
 }
