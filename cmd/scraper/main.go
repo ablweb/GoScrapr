@@ -56,9 +56,7 @@ func main() {
 	}
 	for _, e := range scraped { 
 		fmt.Fprint(os.Stdout, "'")
-		fmt.Fprint(os.Stdout, e.Scope)
-		fmt.Fprint(os.Stdout, " | ")
-		fmt.Fprint(os.Stdout, e.Tag)
+		fmt.Fprint(os.Stdout, e.Path)
 		fmt.Fprint(os.Stdout, " | ")
 		fmt.Fprint(os.Stdout, e.Content)
 		fmt.Fprint(os.Stdout, "'")

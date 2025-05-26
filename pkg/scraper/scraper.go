@@ -13,9 +13,9 @@ import (
 )
 
 type QueryRule struct {
-	Scope    string `json:"scope"`
-	Query    string `json:"query"`
-	Priority int    `json:"priority"`
+	Query    string      `json:"query"`
+	SubRules []QueryRule `json:"subrules,omitempty"`
+	Priority int         `json:"priority"`
 }
 type RuleSet []QueryRule
 
@@ -48,8 +48,7 @@ func LoadRules(rulesPath string) (RuleSet, error) {
 }
 
 type QueryMatch struct {
-	Scope   string
-	Tag     string
+	Path    []string
 	Content string
 }
 type MatchSet []QueryMatch
@@ -63,44 +62,61 @@ func Scrap(url string, rules RuleSet) (MatchSet, error) {
 	c := colly.NewCollector()
 	var matches MatchSet
 
-	// order rules in priotity order
-	sort.Slice(rules, func(i, j int) bool {
-		return rules[i].Priority < rules[j].Priority
-	})
+	orderByPriority(&rules)
+	applyRules(c, &rules, &matches)
 
-	// Fallback behaviour, match everything
-	if len(rules) == 0 {
-		c.OnHTML("html", func(e *colly.HTMLElement) {
-			matches = append(matches, QueryMatch{
-				Scope:   "html",
-				Tag:     "html",
-				Content: e.Text + "\n"})
-		})
-	// Normal behavou, match rules in given scopes
-	} else {
-		for _, rule := range rules {
-			var queryScope = rule.Scope
-			if queryScope == "" {
-				queryScope = "html"
-			}
-			var scopeId int = 0
-			c.OnHTML(queryScope, func(s *colly.HTMLElement) {
-				s.DOM.Find(rule.Query).Each(
-					func(_ int, m *goquery.Selection) {
-						mtext := strings.TrimSpace(m.Text())
-						mtag := goquery.NodeName(m)
-
-						matches = append(matches, QueryMatch{
-							Scope: fmt.Sprintf("%s_%d", s.Name,scopeId),
-							Tag: mtag,
-							Content: mtext})
-					})
-				scopeId++
-			})
-		}
-	}
 	if err := c.Visit(url); err != nil {
 		return nil, err
 	}
 	return matches, nil
+}
+
+// order rules in priotity order
+func orderByPriority(rules *RuleSet) {
+	sort.Slice(*rules, func(i, j int) bool {
+		return (*rules)[i].Priority < (*rules)[j].Priority
+	})
+}
+
+func applyRules(c *colly.Collector, rules *RuleSet, matches *MatchSet) {
+	// Fallback behaviour, match everything
+	if len(*rules) == 0 {
+		c.OnHTML("html", func(e *colly.HTMLElement) {
+			*matches = append(*matches, QueryMatch{
+				Path:    []string{"html"},
+				Content: e.Text + "\n"})
+		})
+		return
+	}
+
+	for _, rule := range *rules {
+		var scopeId int = 0
+		c.OnHTML(rule.Query, func(scope *colly.HTMLElement) {
+			var path []string
+			path = append(path, fmt.Sprintf("%s_%d", scope.Name, scopeId))
+			findMatches(scope.DOM, &rule, path, matches)
+			scopeId++
+		})
+	}
+}
+
+func findMatches(sel *goquery.Selection, subRule *QueryRule, path []string, matches *MatchSet) {
+	// If no children, this is a terminal rule — collect data
+	if len(subRule.SubRules) == 0 {
+		text := strings.TrimSpace(sel.Text())
+		tag := goquery.NodeName(sel)
+		*matches = append(*matches, QueryMatch{
+			Path:    append(path, tag),
+			Content: text,
+		})
+		return
+	}
+
+	// Otherwise, recurse into each child
+	for _, rule := range subRule.SubRules {
+		sel.Find(rule.Query).Each(func(index int, s *goquery.Selection) {
+			newPath := append(path, fmt.Sprintf("%s_%d", rule.Query, index))
+			findMatches(s, &rule, newPath, matches)
+		})
+	}
 }

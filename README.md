@@ -1,5 +1,6 @@
 # GoScrapr
-Convert html wikitable to excel
+Scraper written in go
+Convert html table into excel
 
 # how to use
 1. compile

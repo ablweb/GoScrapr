@@ -1,6 +1,15 @@
 [
   {
-    "scope": ".wikitable",
-    "query": "tr"
+    "query": ".wikitable",
+    "subrules": [
+      {
+        "query": "tr",
+        "subrules": [
+            {
+                "query": "th,td"
+            }
+        ]
+      }
+    ]
   }
 ]
