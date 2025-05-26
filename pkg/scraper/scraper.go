@@ -115,7 +115,7 @@ func findMatches(sel *goquery.Selection, subRule *QueryRule, path []string, matc
 	// Otherwise, recurse into each child
 	for _, rule := range subRule.SubRules {
 		sel.Find(rule.Query).Each(func(index int, s *goquery.Selection) {
-			newPath := append(path, fmt.Sprintf("%s_%d", rule.Query, index))
+			newPath := append(path, fmt.Sprintf("%s_%d", goquery.NodeName(s), index))
 			findMatches(s, &rule, newPath, matches)
 		})
 	}

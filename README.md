@@ -14,5 +14,8 @@ make
 The rule set is a json file, look at ruleSet.json for the structure 
 
 ## TODO
+0. rename wikixlsx, to work with general html table
+1. implement a tree structure for matches
+2. Add test for scraping
 3. write wikixlsx, for simple html wiki table to xlsx table
-2. write same for html table, might be the same idk
+4. write same for html table, might be the same idk
