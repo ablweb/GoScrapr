@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
@@ -21,7 +22,10 @@ type RuleSet []QueryRule
 
 // checks if a URL is valid and online
 func IsReachable(url string) (bool, error) {
-	resp, err := http.Get(url)
+	client := http.Client{
+		Timeout: 4 * time.Second,
+	}
+	resp, err := client.Get(url)
 	if err != nil {
 		return false, err
 	}
