@@ -8,10 +8,17 @@ Convert html table into excel
 make
 ```
 2. run with
+Scraper
 ```bash
 ./bin/scraper <url> [rule set]
 ```
 The rule set is a json file, look at ruleSet.json for the structure 
+
+wikixls
+```bash
+./bin/wikixls <url>
+```
+Convert html to excel
 
 ## TODO
 0. rename wikixlsx, to work with general html table
