@@ -50,7 +50,7 @@ func run(out, errOut io.Writer, args []string) int {
 		}
 	}
 
-	scraped, err := scraper.Scrap(url, rules)
+	scraped, err := scraper.ScrapMatches(url, rules)
 	if err != nil {
 		fmt.Fprintln(errOut, "Error: While scrapping", err)
 		return 1

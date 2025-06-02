@@ -58,7 +58,7 @@ type QueryMatch struct {
 type MatchSet []QueryMatch
 
 // scap url with rule set and return the matches
-func Scrap(url string, rules RuleSet) (MatchSet, error) {
+func ScrapMatches(url string, rules RuleSet) (MatchSet, error) {
 	reach, err := IsReachable(url)
 	if !reach {
 		return nil, err
@@ -98,13 +98,13 @@ func applyRules(c *colly.Collector, rules *RuleSet, matches *MatchSet) {
 		c.OnHTML(rule.Query, func(scope *colly.HTMLElement) {
 			var path []string
 			path = append(path, fmt.Sprintf("%s_%d", scope.Name, scopeId))
-			findMatches(scope.DOM, &rule, path, matches)
+			findMatches(scope.DOM, &rule, matches, path)
 			scopeId++
 		})
 	}
 }
 
-func findMatches(sel *goquery.Selection, subRule *QueryRule, path []string, matches *MatchSet) {
+func findMatches(sel *goquery.Selection, subRule *QueryRule, matches *MatchSet, path []string) {
 	// If no children, this is a terminal rule — collect data
 	if len(subRule.SubRules) == 0 {
 		text := strings.TrimSpace(sel.Text())
@@ -120,7 +120,7 @@ func findMatches(sel *goquery.Selection, subRule *QueryRule, path []string, matc
 	for _, rule := range subRule.SubRules {
 		sel.Find(rule.Query).Each(func(index int, s *goquery.Selection) {
 			newPath := append(path, fmt.Sprintf("%s_%d", goquery.NodeName(s), index))
-			findMatches(s, &rule, newPath, matches)
+			findMatches(s, &rule, matches, newPath)
 		})
 	}
 }
