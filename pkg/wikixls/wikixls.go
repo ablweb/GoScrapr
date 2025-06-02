@@ -20,7 +20,7 @@ var (
 		Fill: excelize.Fill{
 			Type:    "pattern",
 			Pattern: 1,
-			Color:   []string{"#000000"}, // Blue background
+			Color:   []string{"#000000"},
 		},
 		Alignment: &excelize.Alignment{
 			Horizontal: "center",
